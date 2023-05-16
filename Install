@@ -95,6 +95,9 @@ fi
 #
 # re-set permissions
 #
-chmod -f 775 ${FILEDIR}/*
-chgrp mgi ${FILEDIR}/*
+mkdir -p ${PUBLISHDIR}
+mkdir -p ${PUBLISHCURRENT}
+mkdir -p ${PUBLISHPENDING}
+chmod -f 775 ${PUBLISHDIR}/*
+chgrp mgi ${PUBLISHDIR}/*
 

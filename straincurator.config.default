@@ -18,7 +18,6 @@ then
 fi
 
 CONFIG_MASTER=${MGICONFIG}/master.config.sh
-
 export CONFIG_MASTER
 
 . ${CONFIG_MASTER}
@@ -32,13 +31,16 @@ LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
 OUTPUTDIR=${FILEDIR}/output
 ARCHIVEDIR=${FILEDIR}/archive
-
 export INPUTDIR FILEDIR LOGDIR RPTDIR OUTPUTDIR ARCHIVEDIR
 
 # Full path name of the input file
 INPUT_FILE_DEFAULT="${INPUTDIR}/straincuratorload.txt"
-
 export INPUT_FILE_DEFAULT
+
+PUBLISHDIR=/data/strain/
+PUBLISHCURRENT=${PUBLISHDIR}/current
+PUBLISHPENDING=${PUBLISHDIR}/pending
+export PUBLISHDIR PUBLISHCURRENT PUBLISHPENDING
 
 #  Full path name of the log files
 LOG_PROC=${LOGDIR}/straincuratorload.proc.log

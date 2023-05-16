@@ -112,6 +112,12 @@ then
     fi
 fi
 
+echo "Copy file from ${PUBLISHCURRENT}/${INPUT_FILE_NAME} to ${INPUTDIR}" >> ${LOG}
+rm -rf ${INPUTDIR}/${INPUT_FILE_NAME} >> ${LOG}
+cp -r ${PUBLISHCURRENT}/${INPUT_FILE_NAME} ${INPUTDIR} >> ${LOG}
+STAT=$?
+checkStatus ${STAT} "copy of input file"
+
 echo "Running strain/curator load" >> ${LOG}
 $PYTHON ${STRAINCURATORLOAD}/bin/straincuratorload.py ${INPUT_FILE_DEFAULT} load >> ${LOG}
 STAT=$?

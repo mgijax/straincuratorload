@@ -1,0 +1,67 @@
+#format: sh
+#
+#  Configuration for straincuratorload
+#
+#  This file sets up environment variables that are needed for a 
+#  Strain Cuator Load
+#
+###########################################################################
+
+#
+#  If the MGICONFIG environment variable does not have a local override,
+#  use the default "live" settings.
+#
+if [ "${MGICONFIG}" = "" ]
+then
+    MGICONFIG=/usr/local/mgi/live/mgiconfig
+    export MGICONFIG
+fi
+
+CONFIG_MASTER=${MGICONFIG}/master.config.sh
+
+export CONFIG_MASTER
+
+. ${CONFIG_MASTER}
+
+# Full path the the logs, reports, and archive directories 
+FILEDIR=${DATALOADSOUTPUT}/mgi/straincuratorload
+
+# Full path to the input, output, logs, reports and archive directories.
+INPUTDIR=${FILEDIR}/input
+LOGDIR=${FILEDIR}/logs
+RPTDIR=${FILEDIR}/reports
+OUTPUTDIR=${FILEDIR}/output
+ARCHIVEDIR=${FILEDIR}/archive
+
+export INPUTDIR FILEDIR LOGDIR RPTDIR OUTPUTDIR ARCHIVEDIR
+
+# Full path name of the input file
+INPUT_FILE_DEFAULT="${INPUTDIR}/straincuratorload.txt"
+
+export INPUT_FILE_DEFAULT
+
+#  Full path name of the log files
+LOG_PROC=${LOGDIR}/straincuratorload.proc.log
+LOG_DIAG=${LOGDIR}/straincuratorload.diag.log
+LOG_CUR=${LOGDIR}/straincuratorload.cur.log
+LOG_VAL=${LOGDIR}/straincuratorload.val.log
+
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL
+
+# this load's login value for jobstream 
+JOBSTREAM=straincuratorload
+
+export JOBSTREAM
+
+###########################################################################
+#  The name of the load for the subject of an email notification
+# will be set by wrapper based on collection for each load
+MAIL_LOADNAME="Strain Curator Load"
+
+export MAIL_LOADNAME
+
+#  INSTALLDIR expected by dlautils/DLAInstall
+INSTALLDIR=${STRAINCURATORLOAD}
+
+export INSTALLDIR
+

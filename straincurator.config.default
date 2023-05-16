@@ -48,8 +48,9 @@ LOG_PROC=${LOGDIR}/straincuratorload.proc.log
 LOG_DIAG=${LOGDIR}/straincuratorload.diag.log
 LOG_CUR=${LOGDIR}/straincuratorload.cur.log
 LOG_VAL=${LOGDIR}/straincuratorload.val.log
+LOG_ERROR=${LOGDIR}/straincuratorload.error.log
 
-export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_ERROR
 
 # this load's login value for jobstream 
 JOBSTREAM=straincuratorload

@@ -41,15 +41,14 @@ if mode == "load":
         db.setTrace()
 
 lineNum = 0
-error = 0
+hasError = 0
 
-diagFile = ''		# diagnostic file descriptor
-errorFile = ''		# error file descriptor
-inputFile = ''		# file descriptor
-markerFile = ''         # file descriptor
-synonymFile = ''        # file descriptor
-diagFileName = ''	# diagnostic file name
-errorFileName = ''	# error file name
+diagFile = os.environ['LOG_DIAG']
+errorFile = os.environ['LOG_ERROR']
+inputFile = os.environ['INPUTDIR']
+outputFile = os.environ['OUTPUTDIR']
+markerFile = ''
+synonymFile = ''
 
 markerTable = 'PRB_Strain_Marker'
 synonymTable = 'MGI_Synonym'
@@ -60,6 +59,8 @@ updateSQL = ''
 
 strainmarkerKey = 0	# PRB_Strain_Marker._StrainMarker_key
 synonymKey = 0          # MGI_Synonym._Synonym_key
+hasStrainMarker = 0
+hasSynonym = 0
 
 mgiTypeKey = 10		# ACC_MGIType._MGIType_key for Strains
 alleleTypeKey = 11      # ACC_MGIType._MGIType_key for Allele
@@ -87,7 +88,7 @@ def exit(
     try:
         diagFile.write('\n\nEnd Date/Time: %s\n' % (mgi_utils.date()))
 
-        if error == 0:
+        if hasError == 0:
                 errorFile.write("\nSanity check : successful\n")
         else:
                 errorFile.write("\nSanity check : failed")
@@ -121,8 +122,8 @@ def init():
     else:
         fdate = mgi_utils.date('%m%d%Y')	# current date
         head, tail = os.path.split(inputFileName) 
-        diagFileName = tail + '.' + fdate + '.diagnostics'
-        errorFileName = tail + '.' + fdate + '.error'
+        diagFileName = inputFile + '/' + tail + '.' + fdate + '.diagnostics'
+        errorFileName = inputFile + '/' + tail + '.' + fdate + '.error'
 
     try:
         diagFile = open(diagFileName, 'w')
@@ -141,12 +142,12 @@ def init():
     
     if mode != "preview":
         try:
-                markerFile = open(markerFileName, 'w')
+                markerFile = open(outputFile + '/' + markerFileName, 'w')
         except:
                 exit(1, 'Could not open file %s\n' % markerFileName)
 
         try:
-                synonymFile = open(synonymFileName, 'w')
+                synonymFile = open(outputFile + '/' + synonymFileName, 'w')
         except:
                 exit(1, 'Could not open file %s\n' % synonymFileName)
 
@@ -221,7 +222,8 @@ def processFile():
     global lineNum
     global strainmarkerKey, synonymKey
     global updateSQL
-    global error
+    global hasError
+    global hasStrainMarker, hasSynonym
 
     # For each line in the input file
 
@@ -251,10 +253,10 @@ def processFile():
 
         if strainKey == 0 or modifiedByKey == 0:
             # set error flag to true
-            error = 1
+            hasError = 1
 
         # if errors, continue to next record
-        if error:
+        if hasError == 1:
             continue
 
         # if no errors, process
@@ -268,7 +270,7 @@ def processFile():
                 alleleKey = loadlib.verifyObject(a, alleleTypeKey, None, lineNum, errorFile)
 
                 if alleleKey == 0 or alleleKey == None:
-                    error = 1
+                    hasError = 1
                     continue
 
                 results = db.sql('select _Marker_key from ALL_Allele where _Allele_key = %s' % (alleleKey),  'auto')
@@ -285,19 +287,20 @@ def processFile():
                     % (strainmarkerKey, strainKey, alleleKey, qualifierKey, modifiedByKey, modifiedByKey, cdate, cdate))
 
                 strainmarkerKey = strainmarkerKey + 1
+                hasStrainMarker = 1
 
         if mode == "preview":
                 continue
 
-        updateSQL += '''update PRB_Strain
-                set name = \'%s\', standard = %s, private = %s, modifiedby_key = %s, modification_date = now()
-                where _Strain_key = %s;\n
-                ''' % (name, isStandard, isPrivate, modifiedByKey, strainKey)
+        updateSQL = updateSQL + \
+	'''update PRB_Strain set strain = \'%s\', standard = %s, private = %s, _modifiedby_key = %s, modification_date = now() where _Strain_key = %s;\n''' \
+	% (name, isStandard, isPrivate, modifiedByKey, strainKey)
 
         if name != oldName:
                 synonymFile.write('%d|%d|%d|%d||%s|%s|%s|%s|%s\n' \
                         % (synonymKey, strainKey, mgiTypeKey, synonymTypeKey, oldName, modifiedByKey, modifiedByKey, cdate, cdate))
                 synonymKey = synonymKey + 1
+                hasSynonym = 1
 
     #	end of "for line in inputFile.readlines():"
 
@@ -318,7 +321,7 @@ def bcpFiles():
         return
 
     # do not process if errors are detected
-    if error > 0:
+    if hasError == 1:
     	return
 
     bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
@@ -326,27 +329,21 @@ def bcpFiles():
     markerFile.flush()
     synonymFile.flush()
 
-    currentDir = os.getcwd()
+    if hasStrainMarker == 1:
+    	bcp1 = '%s %s %s %s %s %s "|" "\\n" mgd' % (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), markerTable, outputFile, markerFileName)
+    	diagFile.write('%s\n' % bcp1)
+    	os.system(bcp1)
+    	# update prb_strain_marker_seq auto-sequence
+    	db.sql(''' select setval('prb_strain_marker_seq', (select max(_StrainMarker_key) from PRB_Strain_Marker)) ''', None)
+    	db.commit()
 
-    bcp1 = '%s %s %s %s %s %s "|" "\\n" mgd' % \
-        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'PRB_Strain_Marker', currentDir, markerFileName)
-
-    bcp2 = '%s %s %s %s %s %s "|" "\\n" mgd' % \
-        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'MGI_Synonym', currentDir, synonymFileName)
-
-    diagFile.write('%s\n' % bcp1)
-    diagFile.write('%s\n' % bcp2)
-
-    os.system(bcp1)
-    os.system(bcp2)
-
-    # update prb_strain_marker_seq auto-sequence
-    db.sql(''' select setval('prb_strain_marker_seq', (select max(_StrainMarker_key) from PRB_Strain_Marker)) ''', None)
-    db.commit()
-
-    # update mgi_synonym_seq auto-sequence
-    db.sql(''' select setval('mgi_synonym_seq', (select max(_Synonym_key) from MGI_Synonym) ''', None)
-    db.commit()
+    if hasSynonym == 1:
+    	bcp2 = '%s %s %s %s %s %s "|" "\\n" mgd' % (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), synonymTable, outputFile, synonymFileName)
+    	diagFile.write('%s\n' % bcp2)
+    	os.system(bcp2)
+    	# update mgi_synonym_seq auto-sequence
+    	db.sql(''' select setval('mgi_synonym_seq', (select max(_Synonym_key) from MGI_Synonym)) ''', None)
+    	db.commit()
 
     if len(updateSQL) > 0:
         diagFile.write('running updateSQL...\n')

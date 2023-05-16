@@ -27,7 +27,7 @@ usage ()
     exit 1
 }
 
-CONFIG=${STRAINCURATORLOAD}/straincuratorload.config
+CONFIG=${STRAINCURATORLOAD}/straincurator.config
 INPUT_FILE=$1
 
 #

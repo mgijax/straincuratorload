@@ -124,10 +124,10 @@ def init():
         exit(1, 'Could not open inputFileName=sys.argv[1] or mode=sys.argv[2]\n')
 
     if mode == "preview":
-	isSantifyCheck = 1
+        isSanityCheck = 1
 
     # place diag/error file in current directory
-    if isSantifyCheck == 1:
+    if isSanityCheck == 1:
         diagFileName = inputFileName + '.diagnostics'
         errorFileName = inputFileName + '.error'
 
@@ -146,7 +146,7 @@ def init():
     except:
         exit(1, 'Could not open file %s\n' % inputFileName)
     
-    if isSantifyCheck == 0:
+    if isSanityCheck == 0:
         try:
                 markerFile = open(outputFile + '/' + markerFileName, 'w')
         except:
@@ -320,7 +320,7 @@ def processFile():
                     errorFile.write('Invalid Allele ID/Private/Status (%d) %s,%s,%s\n' % (lineNum, a, isPrivate, alleleStatus))
                     continue
 
-                if isSantifyCheck == 1:
+                if isSanityCheck == 1:
                         continue
 
                 markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
@@ -329,7 +329,7 @@ def processFile():
                 strainmarkerKey = strainmarkerKey + 1
                 hasStrainMarker = 1
 
-        if isSantifyCheck == 1:
+        if isSanityCheck == 1:
                 continue
 
         updateSQL = updateSQL + \
@@ -354,7 +354,7 @@ def processFile():
 def bcpFiles():
 
     # do not process
-    if isSanitCheck == 1:
+    if isSanityCheck == 1:
         return
 
     # do not process if errors are detected

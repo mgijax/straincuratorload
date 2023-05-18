@@ -87,12 +87,12 @@ echo "Copy file from ${PUBLISHCURRENT}/${INPUT_FILE_NAME} to ${INPUTDIR}" | tee 
 rm -rf ${INPUTDIR}/${INPUT_FILE_NAME} | tee -a ${LOG_DIAG}
 cp -r ${PUBLISHCURRENT}/${INPUT_FILE_NAME} ${INPUTDIR} | tee -a ${LOG_DIAG}
 STAT=$?
-checkStatus ${STAT} "copy of input file\n"
+checkStatus ${STAT} "copy of input file"
 
 echo "Running strain/curator load" | tee -a ${LOG_DIAG}
 ${PYTHON} ${STRAINCURATORLOAD}/bin/straincuratorload.py ${INPUT_FILE_DEFAULT} load | tee -a ${LOG_DIAG}
 STAT=$?
-checkStatus ${STAT} "straincuratorload.py\n"
+checkStatus ${STAT} "straincuratorload.py"
 
 #
 # Touch the "lastrun" file to note when the load was run.

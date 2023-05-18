@@ -35,7 +35,7 @@ import db
 import mgi_utils
 import loadlib
 
-#db.setTrace()
+db.setTrace()
 
 inputFileName = ''
 mode = ''
@@ -198,7 +198,7 @@ def verifyStrain(
         oldName = r['strain']
 
     if strainKey == 0:
-            errorFile.write('Invalid Strain (%d) %s\n' % (lineNum, strainID))
+            errorFile.write('Invalid Strain (row %d) %s\n' % (lineNum, strainID))
 
     return strainKey, oldName
 
@@ -210,6 +210,8 @@ def verifyStrain(
 # Throws:  nothing
 def verifyAllele(
     alleleID, 	# Allele ID (string)
+    strainID, 	# Strain ID (string)
+    strainKey,  # Strain key (string)
     lineNum	# line number (integer)
     ):
 
@@ -229,13 +231,25 @@ def verifyAllele(
         ''' % (alleleID), 'auto')
 
     for r in results:
-        alleleKey = r['_allele_key']
-        markerKey = r['_marker_key']
-        alleleStatusKey = r['_allele_status_key']
-        alleleStatus = r['term']
+
+	# if allele exists and is already attached to this strain, then skip
+        pmresults = db.sql('''select _strainmarker_key 
+		from PRB_Strain_Marker pm 
+		where pm._strain_key = %s 
+		and pm._allele_key = %s
+		''' % (strainKey, r['_allele_key']), 'auto')
+
+        if len(pmresults) >= 0:
+            errorFile.write('This relationship already exists (row %d) Strain:%s, Allele:%s\n' % (lineNum, strainID, alleleID))
+            return alleleKey, markerKey, alleleStatusKey, alleleStatus
+        else:
+            alleleKey = r['_allele_key']
+            markerKey = r['_marker_key']
+            alleleStatusKey = r['_allele_status_key']
+            alleleStatus = r['term']
 
     if alleleKey == 0:
-            errorFile.write('Invalid Allele (%d) %s\n' % (lineNum, alleleID))
+            errorFile.write('Invalid Allele (row %d) %s\n' % (lineNum, alleleID))
 
     return alleleKey, markerKey, alleleStatusKey, alleleStatus
 
@@ -296,11 +310,7 @@ def processFile():
         modifiedByKey = loadlib.verifyUser(modifiedBy, lineNum, errorFile)
 
         if strainKey == 0 or modifiedByKey == 0:
-            # set error flag to true
             hasError = 1
-
-        # if errors, continue to next record
-        if hasError == 1:
             continue
 
         # if no errors, process
@@ -311,7 +321,7 @@ def processFile():
 
             for a in allAlleles:
 
-                alleleKey, markerKey, alleleStatusKey, alleleStatus = verifyAllele(a, lineNum)
+                alleleKey, markerKey, alleleStatusKey, alleleStatus = verifyAllele(a, strainID, strainKey, lineNum)
 
                 if alleleKey == 0 or alleleKey == None:
                     hasError = 1

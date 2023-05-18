@@ -58,9 +58,10 @@ else
 fi
 
 #
+# Convert input file
 # Invoke the load using santiy check mode
 # and the arguments that were passed to this script.
 #
+dos2unix $1 $1 2>/dev/null
 ${PYTHON} ${STRAINCURATORLOAD}/bin/straincuratorload.py $1 preview
 cat $1.error
-

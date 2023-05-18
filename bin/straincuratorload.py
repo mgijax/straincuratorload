@@ -39,6 +39,7 @@ import loadlib
 
 inputFileName = ''
 mode = ''
+isSanityCheck = 0
 lineNum = 0
 hasError = 0
 
@@ -112,14 +113,21 @@ def exit(
 #          exits if files cannot be opened
 # Throws: nothing
 def init():
-    global inputFileName, mode
+    global inputFileName, mode, isSanityCheck
     global diagFile, errorFile, inputFile
     global markerFile, synonymFile
  
-    inputFileName = sys.argv[1]
-    mode = sys.argv[2]
+    try:
+        inputFileName = sys.argv[1]
+        mode = sys.argv[2]
+    except:
+        exit(1, 'Could not open inputFileName=sys.argv[1] or mode=sys.argv[2]\n')
 
     if mode == "preview":
+	isSantifyCheck = 1
+
+    # place diag/error file in current directory
+    if isSantifyCheck == 1:
         diagFileName = inputFileName + '.diagnostics'
         errorFileName = inputFileName + '.error'
 
@@ -138,7 +146,7 @@ def init():
     except:
         exit(1, 'Could not open file %s\n' % inputFileName)
     
-    if mode != "preview":
+    if isSantifyCheck == 0:
         try:
                 markerFile = open(outputFile + '/' + markerFileName, 'w')
         except:
@@ -312,7 +320,7 @@ def processFile():
                     errorFile.write('Invalid Allele ID/Private/Status (%d) %s,%s,%s\n' % (lineNum, a, isPrivate, alleleStatus))
                     continue
 
-                if mode == "preview":
+                if isSantifyCheck == 1:
                         continue
 
                 markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
@@ -321,7 +329,7 @@ def processFile():
                 strainmarkerKey = strainmarkerKey + 1
                 hasStrainMarker = 1
 
-        if mode == "preview":
+        if isSantifyCheck == 1:
                 continue
 
         updateSQL = updateSQL + \
@@ -345,14 +353,14 @@ def processFile():
 # Throws:   nothing
 def bcpFiles():
 
-    # do not process if using "preview" mode
-    if mode == "preview":
+    # do not process
+    if isSanitCheck == 1:
         return
 
     # do not process if errors are detected
-    #if hasError == 1:
-    #    errorFile.write("\nCannot process this file.  Sanity check failed\n")
-    #    return
+    if hasError == 1:
+        errorFile.write("\nCannot process this file.  Sanity check failed\n")
+        return
 
     bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
     db.commit()

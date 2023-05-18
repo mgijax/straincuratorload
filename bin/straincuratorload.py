@@ -37,9 +37,8 @@ import loadlib
 
 #db.setTrace()
 
-inputFileName = sys.argv[1]
-mode = sys.argv[2]
-
+inputFileName = ''
+mode = ''
 lineNum = 0
 hasError = 0
 
@@ -113,12 +112,16 @@ def exit(
 #          exits if files cannot be opened
 # Throws: nothing
 def init():
+    global inputFileName, mode
     global diagFile, errorFile, inputFile
     global markerFile, synonymFile
  
-    #if mode == "preview":
-    #    diagFileName = inputFileName + '.diagnostics'
-    #    errorFileName = inputFileName + '.error'
+    inputFileName = sys.argv[1]
+    mode = sys.argv[2]
+
+    if mode == "preview":
+        diagFileName = inputFileName + '.diagnostics'
+        errorFileName = inputFileName + '.error'
 
     try:
         diagFile = open(diagFileName, 'a')

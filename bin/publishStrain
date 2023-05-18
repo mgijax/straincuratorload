@@ -31,8 +31,7 @@ CONFIG=${STRAINCURATORLOAD}/straincurator.config
 SOURCEFILE=$1
 
 #
-# The strainload product is not installed on all servers, so make sure
-# it exists on this one.
+# Make sure the load product exists on this server
 #
 if [ ! -d ${STRAINCURATORLOAD} ]
 then

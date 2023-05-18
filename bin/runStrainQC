@@ -26,8 +26,7 @@ usage ()
 }
 
 #
-# The strainload product is not installed on all servers, so make sure
-# it exists on this one.
+# Make sure the load product exists on this server
 #
 if [ ! -d ${STRAINCURATORLOAD} ]
 then
@@ -59,7 +58,7 @@ else
 fi
 
 #
-# Invoke the strainload using santiy check mode
+# Invoke the load using santiy check mode
 # and the arguments that were passed to this script.
 #
 ${PYTHON} ${STRAINCURATORLOAD}/bin/straincuratorload.py $1 preview

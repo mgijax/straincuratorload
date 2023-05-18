@@ -35,13 +35,14 @@ import db
 import mgi_utils
 import loadlib
 
-#db.setTrace()
+db.setTrace()
 
 inputFileName = ''
 mode = ''
 isSanityCheck = 0
 lineNum = 0
-hasError = 0
+hasFatalError = 0
+hasWarningError = 0
 
 diagFileName = os.environ['LOG_DIAG']
 errorFileName = os.environ['LOG_ERROR']
@@ -90,7 +91,7 @@ def exit(
     try:
         diagFile.write('\n\nEnd Date/Time: %s\n' % (mgi_utils.date()))
 
-        if hasError == 0:
+        if hasFatalError == 0:
                 errorFile.write("\nSanity check : successful\n")
         else:
                 errorFile.write("\nSanity check : failed")
@@ -202,6 +203,36 @@ def verifyStrain(
 
     return strainKey, oldName
 
+# Purpose:  verify Strain Name
+# Returns:  Strain Key
+# Assumes:  nothing
+# Effects:  verifies that the Strain Name is/is not a duplicate ; already exists in database
+#	writes to the error file if the Strain is invalid
+# Throws:  nothing
+def verifyStrainName(
+    strainKey,  # strain key (string)
+    name,	# name (string)
+    lineNum	# line number (integer)
+    ):
+
+    nameKey = 0
+
+    results = db.sql('''select s._strain_key, s.strain 
+    	from PRB_Strain s 
+	where s.strain = \'%s\'
+	and s._strain_key != %s
+	and s._strain_key != 0
+	''' % (name, strainKey), 'auto')
+
+    for r in results:
+        nameKey = r['_strain_key']
+
+    if nameKey != 0:
+            errorFile.write('Strain Name Already Exists (row %d) %s\n' % (lineNum, name))
+
+    return nameKey
+
+# Purpose:  verify Allele
 # Purpose:  verify Allele
 # Returns:  Allele Key, Marker Key, Allele Status Key
 # Assumes:  nothing
@@ -214,6 +245,8 @@ def verifyAllele(
     strainKey,  # Strain key (string)
     lineNum	# line number (integer)
     ):
+
+    global hasFatalError, hasWarningError
 
     alleleKey = 0
     markerKey = 0
@@ -230,6 +263,10 @@ def verifyAllele(
 	and s._marker_key is not null
         ''' % (alleleID), 'auto')
 
+    if len(results) == 0:
+        errorFile.write('Invalid Allele (row %d) %s\n' % (lineNum, alleleID))
+        hasFatalError += 1
+
     for r in results:
 
 	# if allele exists and is already attached to this strain, then skip
@@ -240,16 +277,13 @@ def verifyAllele(
 		''' % (strainKey, r['_allele_key']), 'auto')
 
         if len(pmresults) >= 0:
-            errorFile.write('This relationship already exists (row %d) Strain:%s, Allele:%s\n' % (lineNum, strainID, alleleID))
-            return alleleKey, markerKey, alleleStatusKey, alleleStatus
+            errorFile.write('Warning: This relationship already exists (row %d) Strain:%s, Allele:%s\n' % (lineNum, strainID, alleleID))
+            hasWarningError += 1
         else:
             alleleKey = r['_allele_key']
             markerKey = r['_marker_key']
             alleleStatusKey = r['_allele_status_key']
             alleleStatus = r['term']
-
-    if alleleKey == 0:
-            errorFile.write('Invalid Allele (row %d) %s\n' % (lineNum, alleleID))
 
     return alleleKey, markerKey, alleleStatusKey, alleleStatus
 
@@ -280,7 +314,7 @@ def processFile():
     global lineNum
     global strainmarkerKey, synonymKey
     global updateSQL
-    global hasError
+    global hasFatalError, hasWarningError
     global hasStrainMarker, hasSynonym
 
     # For each line in the input file
@@ -307,10 +341,12 @@ def processFile():
                 continue
 
         strainKey, oldName = verifyStrain(strainID, lineNum)
+        print(strainID, strainKey, hasFatalError)
+        nameKey = verifyStrainName(strainKey, name, lineNum)
         modifiedByKey = loadlib.verifyUser(modifiedBy, lineNum, errorFile)
 
-        if strainKey == 0 or modifiedByKey == 0:
-            hasError = 1
+        if strainKey == 0 or nameKey > 0 or modifiedByKey == 0:
+            hasFatalError += 1
             continue
 
         # if no errors, process
@@ -323,18 +359,17 @@ def processFile():
 
                 alleleKey, markerKey, alleleStatusKey, alleleStatus = verifyAllele(a, strainID, strainKey, lineNum)
 
-                if alleleKey == 0 or alleleKey == None:
-                    hasError = 1
+                if alleleKey == 0:
                     continue
 
 		# if Private = No, then allele status must be Approved or Autoloaded
                 if isPrivate == 0 and alleleStatusKey not in (847114,3983021):
-                    hasError = 1
+                    hasFatalError += 1
                     errorFile.write('Invalid Allele ID/Private/Status (%d) %s,%s,%s\n' % (lineNum, a, isPrivate, alleleStatus))
                     continue
 
                 if isSanityCheck == 1:
-                        continue
+                    continue
 
                 markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
                     % (strainmarkerKey, strainKey, markerKey, alleleKey, qualifierKey, modifiedByKey, modifiedByKey, cdate, cdate))
@@ -371,7 +406,7 @@ def bcpFiles():
         return
 
     # do not process if errors are detected
-    if hasError == 1:
+    if hasFatalError > 0:
         errorFile.write("\nCannot process this file.  Sanity check failed\n")
         return
 

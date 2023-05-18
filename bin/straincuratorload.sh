@@ -1,46 +1,18 @@
 #!/bin/sh
 #
-#  straincuratorload.sh
-###########################################################################
+# Purpose:
+#	wrapper for straincuratorload.py
 #
-#  Purpose:
+# History
 #
-#  Usage=straincuratorload.sh
+# lec   05/12/2023
+#	- wts2-902/flr-344/Strain Curator easy update load (part 1)
 #
-#  Inputs:
-#
-#      - Common configuration file -
-#               /usr/local/mgi/live/mgiconfig/master.config.sh
-#      - load configuration file - straincurator.config
-#      - input file - see python script header
-#
-#  Outputs:
-#
-#      - An archive file
-#      - Log files defined by the environment variables ${LOG_PROC},
-#        ${LOG}, ${LOG_CUR} and ${LOG_VAL}
-#      - Input file for annotload
-#      - see annotload outputs
-#      - Records written to the database tables
-#      - Exceptions written to standard error
-#      - Configuration and initialization errors are written to a log file
-#        for the shell script
-#
-#  Exit Codes:
-#
-#      0:  Successful completion
-#      1:  Fatal error occurred
-#      2:  Non-fatal error occurred
-#
-#  Assumes:  Nothing
-#
-# History:
-#
+
 
 cd `dirname $0`
 
 COMMON_CONFIG=${STRAINCURATORLOAD}/straincurator.config
-
 USAGE="Usage: straincuratorload.sh"
 
 #
@@ -57,7 +29,7 @@ fi
 #
 # Initialize the log file.
 #
-LOG=${LOG_DIAG}
+LOG=${LOGDIR}/$0.log
 rm -rf ${LOG}
 touch ${LOG}
 
@@ -102,7 +74,6 @@ if [ -f ${LASTRUN_FILE} ]
 then
     if test ${LASTRUN_FILE} -nt ${INPUT_FILE_DEFAULT}
     then
-
         echo "Input file has not been updated - skipping load" | tee -a ${LOG_PROC}
         # set STAT for shutdown
         STAT=0
@@ -112,14 +83,14 @@ then
     fi
 fi
 
-echo "Copy file from ${PUBLISHCURRENT}/${INPUT_FILE_NAME} to ${INPUTDIR}" >> ${LOG}
-rm -rf ${INPUTDIR}/${INPUT_FILE_NAME} >> ${LOG}
-cp -r ${PUBLISHCURRENT}/${INPUT_FILE_NAME} ${INPUTDIR} >> ${LOG}
+echo "Copy file from ${PUBLISHCURRENT}/${INPUT_FILE_NAME} to ${INPUTDIR}" | tee -a ${LOG_DIAG}
+rm -rf ${INPUTDIR}/${INPUT_FILE_NAME} | tee -a ${LOG_DIAG}
+cp -r ${PUBLISHCURRENT}/${INPUT_FILE_NAME} ${INPUTDIR} | tee -a ${LOG_DIAG}
 STAT=$?
 checkStatus ${STAT} "copy of input file"
 
-echo "Running strain/curator load" >> ${LOG}
-$PYTHON ${STRAINCURATORLOAD}/bin/straincuratorload.py ${INPUT_FILE_DEFAULT} load >> ${LOG}
+echo "Running strain/curator load" | tee -a ${LOG_DIAG}
+${PYTHON} ${STRAINCURATORLOAD}/bin/straincuratorload.py ${INPUT_FILE_DEFAULT} load | tee -a ${LOG_DIAG}
 STAT=$?
 checkStatus ${STAT} "straincuratorload.py"
 

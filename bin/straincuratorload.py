@@ -6,7 +6,8 @@
 #	A tab-delimited file in the format:
 #
 #       field 1: MGI:Strain ID
-#       field 2: MGI Allele ID : not required : pipe delimited : QC that if Private = No, then allele status = (approved or autoloaded)
+#       field 2: MGI Allele ID : not required : pipe delimited 
+#		if Private = No, then allele status must be Approved or Autoloaded
 #       field 3: Strain Name
 #       field 4: Standard (1/0)
 #       field 5: Private (1/0)
@@ -25,7 +26,7 @@
 # History
 #
 # lec	05/12/2023
-#	- wts2-902/flr-344
+#	- wts2-902/flr-344/Strain Curator easy update load (part 1)
 #
 
 import sys
@@ -34,19 +35,21 @@ import db
 import mgi_utils
 import loadlib
 
+#db.setTrace()
+
 inputFileName = sys.argv[1]
 mode = sys.argv[2]
-
-if mode == "load":
-        db.setTrace()
 
 lineNum = 0
 hasError = 0
 
-diagFile = os.environ['LOG_DIAG']
-errorFile = os.environ['LOG_ERROR']
+diagFileName = os.environ['LOG_DIAG']
+errorFileName = os.environ['LOG_ERROR']
 inputFile = os.environ['INPUTDIR']
 outputFile = os.environ['OUTPUTDIR']
+
+diagFile = ''
+errorFile = ''
 markerFile = ''
 synonymFile = ''
 
@@ -76,7 +79,6 @@ cdate = mgi_utils.date('%m/%d/%Y')	# current date
 # Assumes: nothing
 # Effects: exits with exit status
 # Throws: nothing
-
 def exit(
     status,          # numeric exit status (integer)
     message = None   # exit message (string)
@@ -108,32 +110,25 @@ def exit(
 # Returns: nothing
 # Assumes: nothing
 # Effects: initializes global variables
-#          calls showUsage() if usage error
 #          exits if files cannot be opened
 # Throws: nothing
-
 def init():
-    global diagFile, errorFile, inputFile, errorFileName, diagFileName
+    global diagFile, errorFile, inputFile
     global markerFile, synonymFile
  
-    if mode == "preview":
-        diagFileName = inputFileName + '.diagnostics'
-        errorFileName = inputFileName + '.error'
-    else:
-        fdate = mgi_utils.date('%m%d%Y')	# current date
-        head, tail = os.path.split(inputFileName) 
-        diagFileName = inputFile + '/' + tail + '.' + fdate + '.diagnostics'
-        errorFileName = inputFile + '/' + tail + '.' + fdate + '.error'
+    #if mode == "preview":
+    #    diagFileName = inputFileName + '.diagnostics'
+    #    errorFileName = inputFileName + '.error'
 
     try:
-        diagFile = open(diagFileName, 'w')
+        diagFile = open(diagFileName, 'a')
     except:
-        exit(1, 'Could not open file %s\n' % diagFileName)
+        exit(1, 'Could not open file %s\n' % diagFile)
                 
     try:
         errorFile = open(errorFileName, 'w')
     except:
-        exit(1, 'Could not open file %s\n' % errorFileName)
+        exit(1, 'Could not open file %s\n' % errorFile)
                 
     try:
         inputFile = open(inputFileName, 'r', encoding="latin-1")
@@ -163,31 +158,29 @@ def init():
     return
 
 # Purpose:  verify Strain
-# Returns:  Strain Key if Strain is valid, else 0
+# Returns:  Strain Key
 # Assumes:  nothing
-# Effects:  verifies that the Strain exists either in the Strain dictionary or the database
+# Effects:  verifies that the Strain exists
 #	writes to the error file if the Strain is invalid
-#	adds the Strain and key to the Strain dictionary if the Strain Type is valid
 # Throws:  nothing
-
 def verifyStrain(
-    strainID, 	# Strain (string)
+    strainID, 	# Strain ID (string)
     lineNum	# line number (integer)
     ):
 
     strainKey = 0
     oldName = ''
 
-    results = db.sql('''select s._Strain_key, s.strain 
+    results = db.sql('''select s._strain_key, s.strain 
         from ACC_Accession a, PRB_Strain s
         where a._mgitype_key = 10 
         and a._logicaldb_key = 1 
         and a.accid = \'%s\'
-        and a._Object_key = s._Strain_key
+        and a._object_key = s._strain_key
         ''' % (strainID), 'auto')
 
     for r in results:
-        strainKey = r['_Strain_key']
+        strainKey = r['_strain_key']
         oldName = r['strain']
 
     if strainKey == 0:
@@ -195,12 +188,48 @@ def verifyStrain(
 
     return strainKey, oldName
 
+# Purpose:  verify Allele
+# Returns:  Allele Key, Marker Key, Allele Status Key
+# Assumes:  nothing
+# Effects:  verifies that the Allele & Marker (can be null) exists
+#	writes to the error file if the Allele is invalid
+# Throws:  nothing
+def verifyAllele(
+    alleleID, 	# Allele ID (string)
+    lineNum	# line number (integer)
+    ):
+
+    alleleKey = 0
+    markerKey = 0
+    alleleStatusKey = 0
+    alleleStatus = ""
+
+    results = db.sql('''select s._allele_key, s._marker_key, s._allele_status_key, t.term
+        from ACC_Accession a, ALL_Allele s, VOC_Term t
+        where a._mgitype_key = 11 
+        and a._logicaldb_key = 1 
+        and a.accid = \'%s\'
+        and a._object_key = s._allele_key
+	and s._allele_status_key = t._term_key
+	and s._marker_key is not null
+        ''' % (alleleID), 'auto')
+
+    for r in results:
+        alleleKey = r['_allele_key']
+        markerKey = r['_marker_key']
+        alleleStatusKey = r['_allele_status_key']
+        alleleStatus = r['term']
+
+    if alleleKey == 0:
+            errorFile.write('Invalid Allele (%d) %s\n' % (lineNum, alleleID))
+
+    return alleleKey, markerKey, alleleStatusKey, alleleStatus
+
 # Purpose:  sets global primary key variables
 # Returns:  nothing
 # Assumes:  nothing
 # Effects:  sets global primary key variables
 # Throws:   nothing
-
 def setPrimaryKeys():
 
     global strainKey, strainmarkerKey, accKey, mgiKey, annotKey, synonymKey
@@ -211,12 +240,13 @@ def setPrimaryKeys():
     results = db.sql(''' select nextval('mgi_synonym_seq') as maxKey ''', 'auto')
     synonymKey = results[0]['maxKey']
 
+    return
+
 # Purpose:  processes data
 # Returns:  nothing
 # Assumes:  nothing
 # Effects:  verifies and processes each line in the input file
 # Throws:   nothing
-
 def processFile():
 
     global lineNum
@@ -239,8 +269,8 @@ def processFile():
             alleleIDs = tokens[1]
             name = tokens[2]
             isStandard = tokens[3]
-            isPrivate = tokens[4]
-            modifiedBy = tokens[5]
+            isPrivate = tokens[4] 
+            modifiedBy = tokens[5] 
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
@@ -267,24 +297,23 @@ def processFile():
 
             for a in allAlleles:
 
-                alleleKey = loadlib.verifyObject(a, alleleTypeKey, None, lineNum, errorFile)
+                alleleKey, markerKey, alleleStatusKey, alleleStatus = verifyAllele(a, lineNum)
 
                 if alleleKey == 0 or alleleKey == None:
                     hasError = 1
                     continue
 
-                results = db.sql('select _Marker_key from ALL_Allele where _Allele_key = %s' % (alleleKey),  'auto')
-                markerKey = results[0]['_Marker_key']
+		# if Private = No, then allele status must be Approved or Autoloaded
+                if isPrivate == 0 and alleleStatusKey not in (847114,3983021):
+                    hasError = 1
+                    errorFile.write('Invalid Allele ID/Private/Status (%d) %s,%s,%s\n' % (lineNum, a, isPrivate, alleleStatus))
+                    continue
 
                 if mode == "preview":
                         continue
 
-                if markerKey != None:
-                    markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
                     % (strainmarkerKey, strainKey, markerKey, alleleKey, qualifierKey, modifiedByKey, modifiedByKey, cdate, cdate))
-                else:
-                    markerFile.write('%s|%s||%s|%s|%s|%s|%s|%s\n' \
-                    % (strainmarkerKey, strainKey, alleleKey, qualifierKey, modifiedByKey, modifiedByKey, cdate, cdate))
 
                 strainmarkerKey = strainmarkerKey + 1
                 hasStrainMarker = 1
@@ -304,25 +333,23 @@ def processFile():
 
     #	end of "for line in inputFile.readlines():"
 
+    return
+
+# Purpose:  processes bcp files
+# Returns:  nothing
+# Assumes:  configuration env is set properly
+# Effects:  BCPs the data into the database
+# Throws:   nothing
 def bcpFiles():
-    '''
-    # requires:
-    #
-    # effects:
-    #	BCPs the data into the database
-    #
-    # returns:
-    #	nothing
-    #
-    '''
 
     # do not process if using "preview" mode
     if mode == "preview":
         return
 
     # do not process if errors are detected
-    if hasError == 1:
-    	return
+    #if hasError == 1:
+    #    errorFile.write("\nCannot process this file.  Sanity check failed\n")
+    #    return
 
     bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
     db.commit()
@@ -350,6 +377,8 @@ def bcpFiles():
         diagFile.write(updateSQL)
         db.sql(updateSQL, None)
         db.commit()
+
+    return
 
 #
 # Main

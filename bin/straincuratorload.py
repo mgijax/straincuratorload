@@ -114,7 +114,7 @@ def exit(
 # Throws: nothing
 def init():
     global inputFileName, mode, isSanityCheck
-    global diagFile, errorFile, inputFile
+    global diagFileName, errorFileName, diagFile, errorFile, inputFile
     global markerFile, synonymFile
  
     try:
@@ -137,28 +137,28 @@ def init():
         else:
             diagFile = open(diagFileName, 'a')
     except:
-        exit(1, 'Could not open file %s\n' % diagFile)
+        exit(1, 'Could not open file diagFile: %s\n' % diagFile)
                 
     try:
         errorFile = open(errorFileName, 'w')
     except:
-        exit(1, 'Could not open file %s\n' % errorFile)
+        exit(1, 'Could not open file errorFile: %s\n' % errorFile)
                 
     try:
         inputFile = open(inputFileName, 'r', encoding="latin-1")
     except:
-        exit(1, 'Could not open file %s\n' % inputFileName)
+        exit(1, 'Could not open file inputFIleName: %s\n' % inputFileName)
     
     if isSanityCheck == 0:
         try:
                 markerFile = open(outputFile + '/' + markerFileName, 'w')
         except:
-                exit(1, 'Could not open file %s\n' % markerFileName)
+                exit(1, 'Could not open file markerFileName: %s\n' % markerFileName)
 
         try:
                 synonymFile = open(outputFile + '/' + synonymFileName, 'w')
         except:
-                exit(1, 'Could not open file %s\n' % synonymFileName)
+                exit(1, 'Could not open file synonymFileName: %s\n' % synonymFileName)
 
     # Log all SQL
     db.set_sqlLogFunction(db.sqlLogAll)

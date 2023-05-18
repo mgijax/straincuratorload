@@ -132,7 +132,10 @@ def init():
         errorFileName = inputFileName + '.error'
 
     try:
-        diagFile = open(diagFileName, 'a')
+        if isSanityCheck == 1:
+            diagFile = open(diagFileName, 'w')
+        else:
+            diagFile = open(diagFileName, 'a')
     except:
         exit(1, 'Could not open file %s\n' % diagFile)
                 
@@ -353,7 +356,7 @@ def processFile():
 # Throws:   nothing
 def bcpFiles():
 
-    # do not process
+    # do not process if running sanity check
     if isSanityCheck == 1:
         return
 

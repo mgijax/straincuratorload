@@ -276,7 +276,7 @@ def verifyAllele(
 		and pm._allele_key = %s
 		''' % (strainKey, r['_allele_key']), 'auto')
 
-        if len(pmresults) >= 0:
+        if len(pmresults) > 0:
             errorFile.write('Warning: This relationship already exists (row %d) Strain:%s, Allele:%s\n' % (lineNum, strainID, alleleID))
             hasWarningError += 1
         else:
@@ -341,7 +341,6 @@ def processFile():
                 continue
 
         strainKey, oldName = verifyStrain(strainID, lineNum)
-        print(strainID, strainKey, hasFatalError)
         nameKey = verifyStrainName(strainKey, name, lineNum)
         modifiedByKey = loadlib.verifyUser(modifiedBy, lineNum, errorFile)
 
@@ -356,7 +355,6 @@ def processFile():
             allAlleles = alleleIDs.split('|')
 
             for a in allAlleles:
-
                 alleleKey, markerKey, alleleStatusKey, alleleStatus = verifyAllele(a, strainID, strainKey, lineNum)
 
                 if alleleKey == 0:

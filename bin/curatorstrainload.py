@@ -35,7 +35,7 @@ import db
 import mgi_utils
 import loadlib
 
-db.setTrace()
+#db.setTrace()
 
 inputFileName = ''
 mode = ''

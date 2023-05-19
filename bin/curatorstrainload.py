@@ -324,7 +324,7 @@ def processFile():
         lineNum = lineNum + 1
 
         # Split the line into tokens
-        tokens = line[:-1].split('\t')
+        tokens = line.rstrip('\n').split('\t')
 
         try:
             strainID = tokens[0]

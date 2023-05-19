@@ -27,13 +27,13 @@ usage ()
     exit 1
 }
 
-CONFIG=${STRAINCURATORLOAD}/straincurator.config
+CONFIG=${CURATORSTRAINLOAD}/curatorstrainload.config
 SOURCEFILE=$1
 
 #
 # Make sure the load product exists on this server
 #
-if [ ! -d ${STRAINCURATORLOAD} ]
+if [ ! -d ${CURATORSTRAINLOAD} ]
 then
     echo "The strain load software does not exist on this server"
     exit 1

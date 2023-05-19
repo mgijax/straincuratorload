@@ -15,7 +15,7 @@ then
 fi
 
 . ${MGICONFIG}/master.config.sh
-CONFIG=${STRAINCURATORLOAD}/straincurator.config
+CONFIG=${CURATORSTRAINLOAD}/curatorstrainload.config
 
 usage ()
 {
@@ -28,9 +28,9 @@ usage ()
 #
 # Make sure the load product exists on this server
 #
-if [ ! -d ${STRAINCURATORLOAD} ]
+if [ ! -d ${CURATORSTRAINLOAD} ]
 then
-    echo "The straincuratorload software does not exist on this server"; exit 1
+    echo "The curatorstrainload software does not exist on this server"; exit 1
 fi
 
 #
@@ -63,5 +63,5 @@ fi
 # and the arguments that were passed to this script.
 #
 dos2unix $1 $1 2>/dev/null
-${PYTHON} ${STRAINCURATORLOAD}/bin/straincuratorload.py $1 preview
+${PYTHON} ${CURATORSTRAINLOAD}/bin/curatorstrainload.py $1 preview
 cat $1.error

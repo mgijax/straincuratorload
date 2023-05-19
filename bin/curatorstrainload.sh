@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Purpose:
-#	wrapper for straincuratorload.py
+#	wrapper for curatorstrainload.py
 #
 # History
 #
@@ -12,8 +12,8 @@
 
 cd `dirname $0`
 
-COMMON_CONFIG=${STRAINCURATORLOAD}/straincurator.config
-USAGE="Usage: straincuratorload.sh"
+COMMON_CONFIG=${CURATORSTRAINLOAD}/curatorstrainload.config
+USAGE="Usage: curatorstrainload.sh"
 
 #
 # Make sure the common configuration file exists and source it.
@@ -90,9 +90,9 @@ STAT=$?
 checkStatus ${STAT} "copy of input file"
 
 echo "Running strain/curator load" | tee -a ${LOG_DIAG}
-${PYTHON} ${STRAINCURATORLOAD}/bin/straincuratorload.py ${INPUT_FILE_DEFAULT} load | tee -a ${LOG_DIAG}
+${PYTHON} ${CURATORSTRAINLOAD}/bin/curatorstrainload.py ${INPUT_FILE_DEFAULT} load | tee -a ${LOG_DIAG}
 STAT=$?
-checkStatus ${STAT} "straincuratorload.py"
+checkStatus ${STAT} "curatorstrainload.py"
 
 #
 # Touch the "lastrun" file to note when the load was run.

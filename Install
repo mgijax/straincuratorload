@@ -29,10 +29,10 @@ fi
 #
 cd `dirname $0`
 
-cp -r straincurator.config.default straincurator.config
+cp -r curatorstrainload.config.default curatorstrainload.config
 
 # establish the config files
-MAIN_CONFIG=straincurator.config
+MAIN_CONFIG=curatorstrainload.config
 
 # Make sure config file exists and source it
 if [ -r ${MAIN_CONFIG} ]

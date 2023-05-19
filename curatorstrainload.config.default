@@ -60,7 +60,7 @@ export JOBSTREAM
 ###########################################################################
 #  The name of the load for the subject of an email notification
 # will be set by wrapper based on collection for each load
-MAIL_LOADNAME="Strain Curator Load"
+MAIL_LOADNAME="Curator Strain Load"
 
 export MAIL_LOADNAME
 

@@ -344,6 +344,14 @@ def processFile():
         nameKey = verifyStrainName(strainKey, name, lineNum)
         modifiedByKey = loadlib.verifyUser(modifiedBy, lineNum, errorFile)
 
+        if isStandard not in ('0','1'):
+            errorFile.write('Invalid Is-Standard (%d) %s\n' % (lineNum, isStandard))
+            hasFatalError += 1
+
+        if isPrivate not in ('0','1'):
+            errorFile.write('Invalid Is-Privaite (%d) %s\n' % (lineNum, isPrivate))
+            hasFatalError += 1
+
         if strainKey == 0 or nameKey > 0 or modifiedByKey == 0:
             hasFatalError += 1
             continue

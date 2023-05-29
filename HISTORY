@@ -1,3 +1,9 @@
+TAG: curatorstrainload-6-0-22-2
+DATE: 05/29/2023
+STAFF: lec
+wts2-902/fl2-344/Strain Curator load
+fixed bin/curatorstrainload.sh; touch log error
+
 TAG: curatorstrainload-6-0-22-1
 DATE: 05/25/2023
 STAFF: lec

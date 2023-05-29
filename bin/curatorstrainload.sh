@@ -29,7 +29,7 @@ fi
 #
 # Initialize the log file.
 #
-LOG=${LOGDIR}/$0.log
+LOG=${LOGDIR}/curatorstrainload.sh.log
 rm -rf ${LOG}
 touch ${LOG}
 

@@ -9,10 +9,8 @@
 #	- wts2-902/flr-344/Strain Curator easy update load (part 1)
 #
 
-
-cd `dirname $0`
-
-COMMON_CONFIG=${CURATORSTRAINLOAD}/curatorstrainload.config
+BINDIR=`dirname $0`
+COMMON_CONFIG=`cd ${BINDIR}/..; pwd`/curatorstrainload.config
 USAGE="Usage: curatorstrainload.sh"
 
 #

@@ -81,12 +81,6 @@ then
     fi
 fi
 
-echo "Copy file from ${PUBLISHCURRENT}/${INPUT_FILE_NAME} to ${INPUTDIR}" | tee -a ${LOG_DIAG}
-rm -rf ${INPUTDIR}/${INPUT_FILE_NAME} | tee -a ${LOG_DIAG}
-cp -r ${PUBLISHCURRENT}/${INPUT_FILE_NAME} ${INPUTDIR} | tee -a ${LOG_DIAG}
-STAT=$?
-checkStatus ${STAT} "copy of input file"
-
 echo "Running strain/curator load" | tee -a ${LOG_DIAG}
 ${PYTHON} ${CURATORSTRAINLOAD}/bin/curatorstrainload.py ${INPUT_FILE_DEFAULT} load | tee -a ${LOG_DIAG}
 STAT=$?

@@ -100,4 +100,10 @@ mkdir -p ${PUBLISHCURRENT}
 mkdir -p ${PUBLISHPENDING}
 chmod -f 775 ${PUBLISHDIR}/*
 chgrp mgi ${PUBLISHDIR}/*
+chmod -f 775 ${INPUTDIR}
+chgrp mgi ${INPUTDIR}
+chmod -f 775 ${OUTPUTDIR}
+chgrp mgi ${OUTPUTDIR}
+chmod -f 775 ${LOGDIR}
+chgrp mgi ${LOGDIR}
 

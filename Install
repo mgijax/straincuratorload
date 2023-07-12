@@ -29,10 +29,24 @@ fi
 #
 cd `dirname $0`
 
-cp -r curatorstrainload.config.default curatorstrainload.config
+cp -r straincreate.config.default straincreate.config
+cp -r strainupdate.config.default strainupdate.config
 
 # establish the config files
-MAIN_CONFIG=curatorstrainload.config
+MAIN_CONFIG=straincreate.config
+
+# Make sure config file exists and source it
+if [ -r ${MAIN_CONFIG} ]
+then
+    echo "Source ${MAIN_CONFIG}"
+    . ${MAIN_CONFIG}
+else
+    echo "Cannot source configuration file: ${MAIN_CONFIG}"
+    installFailed
+fi
+
+# establish the config files
+MAIN_CONFIG=strainupdate.config
 
 # Make sure config file exists and source it
 if [ -r ${MAIN_CONFIG} ]
@@ -77,7 +91,7 @@ if [ -d ${DEPLOY_PATH} ]; then
         # deployment errors are non-fatal, as they can occur regularly in an
         # SE's development area
 
-        for file in runStrainQC publishStrain
+        for file in publishStrainCreate publishStrainUpdate runStrainCreateQC runStrainUpdateQC
         do
                 cp bin/${file} ${DEPLOY_PATH}
                 if [ $? -ne 0 ]; then

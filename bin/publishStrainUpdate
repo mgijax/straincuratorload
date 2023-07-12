@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  publishStrain
+#  publishStrainUpdate
 ###########################################################################
 #
 # A copy of this script is intended to reside in /usr/local/bin on all
@@ -27,7 +27,7 @@ usage ()
     exit 1
 }
 
-CONFIG=${CURATORSTRAINLOAD}/curatorstrainload.config
+CONFIG=${CURATORSTRAINLOAD}/strainupdate.config
 SOURCEFILE=$1
 
 #

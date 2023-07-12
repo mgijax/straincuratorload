@@ -1,9 +1,6 @@
 #format: sh
 #
-#  Configuration for curatorstrainload
-#
-#  This file sets up environment variables that are needed for a 
-#  Strain Cuator Load
+#  Configuration for Curator Strain Create
 #
 ###########################################################################
 
@@ -34,7 +31,7 @@ ARCHIVEDIR=${FILEDIR}/archive
 export INPUTDIR FILEDIR LOGDIR RPTDIR OUTPUTDIR ARCHIVEDIR
 
 # Full path name of the input file
-INPUT_FILE_NAME=curatorstrainload.txt
+INPUT_FILE_NAME=strainupdate.txt
 INPUT_FILE_DEFAULT=${INPUTDIR}/${INPUT_FILE_NAME}
 export INPUT_FILE_DEFAULT INPUT_FILE_NAME
 
@@ -44,28 +41,24 @@ PUBLISHPENDING=${PUBLISHDIR}/pending
 export PUBLISHDIR PUBLISHCURRENT PUBLISHPENDING
 
 #  Full path name of the log files
-LOG_PROC=${LOGDIR}/curatorstrainload.proc.log
-LOG_DIAG=${LOGDIR}/curatorstrainload.diag.log
-LOG_CUR=${LOGDIR}/curatorstrainload.cur.log
-LOG_VAL=${LOGDIR}/curatorstrainload.val.log
-LOG_ERROR=${LOGDIR}/curatorstrainload.error.log
-
+LOG_PROC=${LOGDIR}/straincreate.proc.log
+LOG_DIAG=${LOGDIR}/straincreate.diag.log
+LOG_CUR=${LOGDIR}/straincreate.cur.log
+LOG_VAL=${LOGDIR}/straincreate.val.log
+LOG_ERROR=${LOGDIR}/straincreate.error.log
 export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_ERROR
 
 # this load's login value for jobstream 
 JOBSTREAM=curatorstrainload
-
 export JOBSTREAM
 
 ###########################################################################
 #  The name of the load for the subject of an email notification
 # will be set by wrapper based on collection for each load
-MAIL_LOADNAME="Curator Strain Load"
-
+MAIL_LOADNAME="Curator Strain Create Load"
 export MAIL_LOADNAME
 
 #  INSTALLDIR expected by dlautils/DLAInstall
 INSTALLDIR=${CURATORSTRAINLOAD}
-
 export INSTALLDIR
 

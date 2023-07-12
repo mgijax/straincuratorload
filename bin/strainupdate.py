@@ -1,5 +1,5 @@
 #
-# Program: straincuratorload.py
+# Program: strainupdate.py
 #
 # Inputs:
 #

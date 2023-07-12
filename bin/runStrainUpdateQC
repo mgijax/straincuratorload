@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  runStrainQC
+#  runStrainUpdateQC
 ###########################################################################
 #
 # A copy of this script is intended to reside in /usr/local/bin on all
@@ -15,7 +15,7 @@ then
 fi
 
 . ${MGICONFIG}/master.config.sh
-CONFIG=${CURATORSTRAINLOAD}/curatorstrainload.config
+CONFIG=${CURATORSTRAINLOAD}/strainupdate.config
 
 usage ()
 {
@@ -63,5 +63,6 @@ fi
 # and the arguments that were passed to this script.
 #
 dos2unix $1 $1 2>/dev/null
-${PYTHON} ${CURATORSTRAINLOAD}/bin/curatorstrainload.py $1 preview
+${PYTHON} ${CURATORSTRAINLOAD}/bin/strainupdate.py $1 preview
 cat $1.error
+

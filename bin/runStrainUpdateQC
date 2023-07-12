@@ -19,7 +19,7 @@ CONFIG=${CURATORSTRAINLOAD}/strainupdate.config
 
 usage ()
 {
-    echo "Usage: runStrainQC input_file"
+    echo "Usage: runStrainUpdateQC input_file"
     echo "       where"
     echo "           input_file = path to the strain input file"
     exit 1

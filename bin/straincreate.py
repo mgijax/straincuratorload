@@ -34,6 +34,9 @@
 #
 # History
 #
+# lec   07/12/2023
+#	- wts2-1198/fl2-410/Moving WTS2-686 to curator control
+#
 # lec	04/09/2014
 #	- TR11623/EMMA strains
 #

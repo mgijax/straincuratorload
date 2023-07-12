@@ -21,7 +21,7 @@ fi
 
 usage ()
 {
-    echo "Usage: publishStrain"
+    echo "Usage: publishStrainUpdate"
     echo "       where"
     echo "           input_file = name of the strain input file"
     exit 1

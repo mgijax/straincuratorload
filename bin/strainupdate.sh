@@ -5,12 +5,15 @@
 #
 # History
 #
+# lec   07/12/2023
+#	- wts2-1198/fl2-410/Moving WTS2-686 to curator control
+#
 # lec   05/12/2023
 #	- wts2-902/flr-344/Strain Curator easy update load (part 1)
 #
 
 BINDIR=`dirname $0`
-COMMON_CONFIG=`cd ${BINDIR}/..; pwd`/curatorstrainload.config
+COMMON_CONFIG=`cd ${BINDIR}/..; pwd`/strainupdate.config
 USAGE="Usage: strainupdate.sh"
 
 #

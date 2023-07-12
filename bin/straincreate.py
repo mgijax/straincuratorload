@@ -56,9 +56,6 @@ lineNum = 0
 hasFatalError = 0
 hasWarningError = 0
 
-TAB = '\t'		# tab
-CRT = '\n'		# carriage return/newline
-
 diagFileName = os.environ['LOG_DIAG']
 errorFileName = os.environ['LOG_ERROR']
 inputFile = os.environ['INPUTDIR']
@@ -387,18 +384,10 @@ def processFile():
         strainExistKey = verifyStrain(name, lineNum)
         strainTypeKey = verifyStrainType(strainType, lineNum)
         speciesKey = verifySpecies(species, lineNum)
-        createdByKey = loadlib.verifyUser(createdBy, 0, errorFile)
+        createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
 
         if strainExistKey > 0 or strainTypeKey == 0 or speciesKey == 0 or createdByKey == 0:
             hasFatalError += 1
-            continue
-
-        # if no errors, process
-
-        if isSanityCheck == 0:
-                strainFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
-                % (strainKey, speciesKey, strainTypeKey, name, isStandard, isPrivate, isGeneticBackground,
-	        createdByKey, createdByKey, cdate, cdate))
 
 	# if Allele found, resolve to Marker
         if len(alleleIDs) > 0:
@@ -415,7 +404,7 @@ def processFile():
                 if alleleKey == None:
                     continue
 
-                # if doing sanity checking, finished with this row; continue
+                # if sanity check only, skip/continue
                 if isSanityCheck == 1:
                         continue
 
@@ -433,9 +422,15 @@ def processFile():
 
                 strainmarkerKey = strainmarkerKey + 1
 
-        # if doing sanity checking, finished with this row; continue
+        # if sanity check only, skip/continue
         if isSanityCheck == 1:
                 continue
+
+        # write to bcp files
+
+        strainFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                % (strainKey, speciesKey, strainTypeKey, name, isStandard, isPrivate, isGeneticBackground,
+	        createdByKey, createdByKey, cdate, cdate))
 
         # MGI Accession ID for all strain
         # all private = 0 (false)

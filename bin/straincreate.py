@@ -1,25 +1,5 @@
-
 #
-# Program: strainload.py
-#
-# Original Author: Lori Corbani
-#
-# Purpose:
-#
-#	To load new Strains into:
-#
-#	PRB_Strain
-#	PRB_Strain_Marker
-#	ACC_Accession
-#	VOC_Annot
-#	MGI_Note
-#
-# Requirements Satisfied by This Program:
-#
-# Usage:
-#	strainload.py
-#
-# Envvars:
+# Program: straincreate.py
 #
 # Inputs:
 #
@@ -52,12 +32,6 @@
 #       Diagnostics file of all input parameters and SQL commands
 #       Error file
 #
-# Exit Codes:
-#
-# Assumes:
-#
-#	That no one else is adding records to the database.
-#
 # History
 #
 # lec	04/09/2014
@@ -73,21 +47,25 @@ import db
 import mgi_utils
 import loadlib
 
-#globals
+#db.setTrace()
 
-db.setTrace()
-
-user = os.environ['MGD_DBUSER']
-passwordFileName = os.environ['MGD_DBPASSWORDFILE']
-inputFileName = os.environ['STRAININPUTFILE']
+inputFileName = os.environ['INPUT_FILE_DEFAULT']
+mode = ''
+isSanityCheck = 0
 lineNum = 0
+hasFatalError = 0
+hasWarningError = 0
 
 TAB = '\t'		# tab
 CRT = '\n'		# carriage return/newline
 
+diagFileName = os.environ['LOG_DIAG']
+errorFileName = os.environ['LOG_ERROR']
+inputFile = os.environ['INPUTDIR']
+outputFile = os.environ['OUTPUTDIR']
+
 diagFile = ''		# diagnostic file descriptor
 errorFile = ''		# error file descriptor
-inputFile = ''		# file descriptor
 strainFile = ''         # file descriptor
 markerFile = ''         # file descriptor
 accFile = ''            # file descriptor
@@ -140,7 +118,6 @@ cdate = mgi_utils.date('%m/%d/%Y')	# current date
 # Assumes: nothing
 # Effects: exits with exit status
 # Throws: nothing
-
 def exit(
     status,          # numeric exit status (integer)
     message = None   # exit message (string)
@@ -151,6 +128,13 @@ def exit(
  
     try:
         diagFile.write('\n\nEnd Date/Time: %s\n' % (mgi_utils.date()))
+
+        if hasFatalError == 0:
+                errorFile.write("\nSanity check : successful\n")
+        else:
+                errorFile.write("\nSanity check : failed")
+                errorFile.write("\nErrors must be fixed before file is published.\n")
+
         errorFile.write('\n\nEnd Date/Time: %s\n' % (mgi_utils.date()))
         diagFile.close()
         errorFile.close()
@@ -168,60 +152,68 @@ def exit(
 #          calls showUsage() if usage error
 #          exits if files cannot be opened
 # Throws: nothing
-
 def init():
-    global diagFile, errorFile, inputFile, errorFileName, diagFileName
-    global strainFile, markerFile, accFile, annotFile
-    global noteFile
+    global inputFileName, mode, isSanityCheck
+    global diagFileName, errorFileName, diagFile, errorFile, inputFile
+    global markerFile, synonymFile
  
-    db.useOneConnection(1)
-    db.set_sqlUser(user)
-    db.set_sqlPasswordFromFile(passwordFileName)
- 
-    fdate = mgi_utils.date('%m%d%Y')	# current date
-    head, tail = os.path.split(inputFileName) 
-    diagFileName = tail + '.' + fdate + '.diagnostics'
-    errorFileName = tail + '.' + fdate + '.error'
+    try:
+        inputFileName = sys.argv[1]
+        mode = sys.argv[2]
+    except:
+        exit(1, 'Could not open inputFileName=sys.argv[1] or mode=sys.argv[2]\n')
+
+    if mode == "preview":
+        isSanityCheck = 1
+
+    # place diag/error file in current directory
+    if isSanityCheck == 1:
+        diagFileName = inputFileName + '.diagnostics'
+        errorFileName = inputFileName + '.error'
 
     try:
-        diagFile = open(diagFileName, 'w')
+        if isSanityCheck == 1:
+            diagFile = open(diagFileName, 'w')
+        else:
+            diagFile = open(diagFileName, 'a')
     except:
-        exit(1, 'Could not open file %s\n' % diagFileName)
+        exit(1, 'Could not open file diagFile: %s\n' % diagFile)
                 
     try:
         errorFile = open(errorFileName, 'w')
     except:
-        exit(1, 'Could not open file %s\n' % errorFileName)
+        exit(1, 'Could not open file errorFile: %s\n' % errorFile)
                 
     try:
         inputFile = open(inputFileName, 'r', encoding="latin-1")
     except:
-        exit(1, 'Could not open file %s\n' % inputFileName)
+        exit(1, 'Could not open file inputFIleName: %s\n' % inputFileName)
+    
+    if isSanityCheck == 0:
+        try:
+                strainFile = open(strainFileName, 'w')
+        except:
+                exit(1, 'Could not open file %s\n' % strainFileName)
 
-    try:
-        strainFile = open(strainFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % strainFileName)
+        try:
+                markerFile = open(markerFileName, 'w')
+        except:
+                exit(1, 'Could not open file %s\n' % markerFileName)
 
-    try:
-        markerFile = open(markerFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % markerFileName)
+        try:
+                accFile = open(accFileName, 'w')
+        except:
+                exit(1, 'Could not open file %s\n' % accFileName)
 
-    try:
-        accFile = open(accFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % accFileName)
+        try:
+                noteFile = open(noteFileName, 'w')
+        except:
+                exit(1, 'Could not open file %s\n' % noteFileName)
 
-    try:
-        noteFile = open(noteFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % noteFileName)
-
-    try:
-        annotFile = open(annotFileName, 'w')
-    except:
-        exit(1, 'Could not open file %s\n' % annotFileName)
+        try:
+                annotFile = open(annotFileName, 'w')
+        except:
+                exit(1, 'Could not open file %s\n' % annotFileName)
 
     # Log all SQL
     db.set_sqlLogFunction(db.sqlLogAll)
@@ -241,12 +233,12 @@ def init():
 #	writes to the error file if the Species is invalid
 #	adds the Species and key to the Species dictionary if the Species is valid
 # Throws:  nothing
-
 def verifySpecies(
     species, 	# Species (string)
     lineNum	# line number (integer)
     ):
 
+    global hasFatalError, hasWarningError
     global speciesDict
 
     if len(speciesDict) == 0:
@@ -259,6 +251,7 @@ def verifySpecies(
             speciesKey = speciesDict[species]
     else:
             errorFile.write('Invalid Species (%d) %s\n' % (lineNum, species))
+            hasFatalError += 1
             speciesKey = 0
 
     return speciesKey
@@ -270,12 +263,12 @@ def verifySpecies(
 #	writes to the error file if the Strain Type is invalid
 #	adds the Strain Type and key to the Strain Type dictionary if the Strain Type is valid
 # Throws:  nothing
-
 def verifyStrainType(
     strainType, 	# Strain Type (string)
     lineNum		# line number (integer)
     ):
 
+    global hasFatalError, hasWarningError
     global strainTypesDict
 
     if len(strainTypesDict) == 0:
@@ -288,6 +281,7 @@ def verifyStrainType(
             strainTypeKey = strainTypesDict[strainType]
     else:
             errorFile.write('Invalid Strain Type (%d) %s\n' % (lineNum, strainType))
+            hasFatalError += 1
             strainTypeKey = 0
 
     return strainTypeKey
@@ -299,12 +293,12 @@ def verifyStrainType(
 #	writes to the error file if the Strain is invalid
 #	adds the Strain and key to the Strain dictionary if the Strain Type is valid
 # Throws:  nothing
-
 def verifyStrain(
     strain, 	# Strain (string)
     lineNum	# line number (integer)
     ):
 
+    global hasFatalError, hasWarningError
     global strainDict
 
     results = db.sql('select _Strain_key, strain from PRB_Strain where strain = \'%s\'' % (strain), 'auto')
@@ -315,6 +309,7 @@ def verifyStrain(
     if strain in strainDict:
             strainExistKey = strainDict[strain]
             errorFile.write('Strain Already Exists (%d) %s\n' % (lineNum, strain))
+            hasFatalError += 1
     else:
             #errorFile.write('Invalid Strain (%d) %s\n' % (lineNum, strain))
             strainExistKey = 0
@@ -326,7 +321,6 @@ def verifyStrain(
 # Assumes:  nothing
 # Effects:  sets global primary key variables
 # Throws:   nothing
-
 def setPrimaryKeys():
 
     global strainKey, strainmarkerKey, accKey, mgiKey, annotKey, noteKey
@@ -354,17 +348,16 @@ def setPrimaryKeys():
 # Assumes:  nothing
 # Effects:  verifies and processes each line in the input file
 # Throws:   nothing
-
 def processFile():
 
     global lineNum
     global strainKey, strainmarkerKey, accKey, mgiKey, annotKey, noteKey
+    global hasFatalError, hasWarningError
 
     # For each line in the input file
 
     for line in inputFile.readlines():
 
-        error = 0
         lineNum = lineNum + 1
 
         # Split the line into tokens
@@ -397,44 +390,55 @@ def processFile():
         createdByKey = loadlib.verifyUser(createdBy, 0, errorFile)
 
         if strainExistKey > 0 or strainTypeKey == 0 or speciesKey == 0 or createdByKey == 0:
-            # set error flag to true
-            error = 1
-
-        # if errors, continue to next record
-        if error:
+            hasFatalError += 1
             continue
 
         # if no errors, process
 
-        strainFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
-            % (strainKey, speciesKey, strainTypeKey, name, isStandard, isPrivate, isGeneticBackground,
-	       createdByKey, createdByKey, cdate, cdate))
+        if isSanityCheck == 0:
+                strainFile.write('%d|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                % (strainKey, speciesKey, strainTypeKey, name, isStandard, isPrivate, isGeneticBackground,
+	        createdByKey, createdByKey, cdate, cdate))
 
 	# if Allele found, resolve to Marker
-
         if len(alleleIDs) > 0:
+
             allAlleles = alleleIDs.split('|')
+
             for a in allAlleles:
+
                 alleleKey = loadlib.verifyObject(a, alleleTypeKey, None, lineNum, errorFile)
+
                 if alleleKey == 0:
                     continue
+
                 if alleleKey == None:
                     continue
+
+                # if doing sanity checking, finished with this row; continue
+                if isSanityCheck == 1:
+                        continue
+
                 results = db.sql('select _Marker_key from ALL_Allele where _Allele_key = %s' % (alleleKey),  'auto')
                 markerKey = results[0]['_Marker_key']
+
                 if markerKey != None:
-                    markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
-                    % (strainmarkerKey, strainKey, markerKey, alleleKey, qualifierKey, 
-                    createdByKey, createdByKey, cdate, cdate))
+                        markerFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
+                        % (strainmarkerKey, strainKey, markerKey, alleleKey, qualifierKey, 
+                        createdByKey, createdByKey, cdate, cdate))
                 else:
-                    markerFile.write('%s|%s||%s|%s|%s|%s|%s|%s\n' \
-                    % (strainmarkerKey, strainKey, alleleKey, qualifierKey, 
-                    createdByKey, createdByKey, cdate, cdate))
+                        markerFile.write('%s|%s||%s|%s|%s|%s|%s|%s\n' \
+                        % (strainmarkerKey, strainKey, alleleKey, qualifierKey, 
+                        createdByKey, createdByKey, cdate, cdate))
+
                 strainmarkerKey = strainmarkerKey + 1
+
+        # if doing sanity checking, finished with this row; continue
+        if isSanityCheck == 1:
+                continue
 
         # MGI Accession ID for all strain
         # all private = 0 (false)
-
         accFile.write('%d|%s%d|%s|%s|1|%d|%d|%s|1|%s|%s|%s|%s\n' \
                 % (accKey, mgiPrefix, mgiKey, mgiPrefix, mgiKey, strainKey, mgiTypeKey, 
                 isPrivate, createdByKey, createdByKey, cdate, cdate))
@@ -450,44 +454,33 @@ def processFile():
 
         # storing data in MGI_Note
         # Strain of Origin Note
-
         if len(sooNote) > 0:
-
             noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
                 % (noteKey, strainKey, mgiNoteObjectKey, mgiStrainOriginTypeKey, sooNote, \
                    createdByKey, createdByKey, cdate, cdate))
-
             noteKey = noteKey + 1
 
         # storing data in MGI_Note
         # Mutant Cell Line of Origin Note
-
         if len(mutantNote) > 0:
-
             noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
                 % (noteKey, strainKey, mgiNoteObjectKey, mgiMutantOriginTypeKey, mutantNote, \
                    createdByKey, createdByKey, cdate, cdate))
-
             noteKey = noteKey + 1
 
         # storing data in MGI_Note
         # IMPC Colony Note
-
         if len(impcColonyNote) > 0:
-
             noteFile.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' \
                 % (noteKey, strainKey, mgiNoteObjectKey, mgiIMPCColonyTypeKey, impcColonyNote, \
                    createdByKey, createdByKey, cdate, cdate))
-
             noteKey = noteKey + 1
 
         #
         # Annotations
-        #
         # _AnnotType_key = 1009
         # _Qualifier_ke = 1614158
         #
-
         if len(annotations) > 0:
             annotations = annotations.split('|')
             for a in annotations:
@@ -522,6 +515,15 @@ def bcpFiles():
     #	nothing
     #
     '''
+
+    # do not process if running sanity check
+    if isSanityCheck == 1:
+        return
+
+    # do not process if errors are detected
+    if hasFatalError > 0:
+        errorFile.write("\nCannot process this file.  Sanity check failed\n")
+        return
 
     db.commit()
     strainFile.flush()
@@ -589,3 +591,4 @@ setPrimaryKeys()
 processFile()
 bcpFiles()
 exit(0)
+

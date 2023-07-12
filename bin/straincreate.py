@@ -250,7 +250,7 @@ def verifySpecies(
     if species in speciesDict:
             speciesKey = speciesDict[species]
     else:
-            errorFile.write('Invalid Species (%d) %s\n' % (lineNum, species))
+            errorFile.write('Invalid Species (row %d): %s\n' % (lineNum, species))
             hasFatalError += 1
             speciesKey = 0
 
@@ -280,7 +280,7 @@ def verifyStrainType(
     if strainType in strainTypesDict:
             strainTypeKey = strainTypesDict[strainType]
     else:
-            errorFile.write('Invalid Strain Type (%d) %s\n' % (lineNum, strainType))
+            errorFile.write('Invalid Strain Type (row %d): %s\n' % (lineNum, strainType))
             hasFatalError += 1
             strainTypeKey = 0
 
@@ -308,10 +308,10 @@ def verifyStrain(
 
     if strain in strainDict:
             strainExistKey = strainDict[strain]
-            errorFile.write('Strain Already Exists (%d) %s\n' % (lineNum, strain))
+            errorFile.write('Strain Already Exists (row %d): %s\n' % (lineNum, strain))
             hasFatalError += 1
     else:
-            #errorFile.write('Invalid Strain (%d) %s\n' % (lineNum, strain))
+            #errorFile.write('Invalid Strain (row %d): %s\n' % (lineNum, strain))
             strainExistKey = 0
 
     return strainExistKey
@@ -382,7 +382,7 @@ def processFile():
             isPrivate = tokens[12]
             impcColonyNote = tokens[13]
         except:
-            exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
+            exit(1, 'Invalid Line (row %d): %s\n' % (lineNum, line))
 
         strainExistKey = verifyStrain(name, lineNum)
         strainTypeKey = verifyStrainType(strainType, lineNum)
@@ -399,13 +399,15 @@ def processFile():
 
             for a in allAlleles:
 
-                alleleKey = loadlib.verifyObject(a, alleleTypeKey, None, lineNum, errorFile)
-
-                if alleleKey == 0:
+                results = db.sql('''
+                        select _Object_key from ACC_Accession where _mgitype_key = %s and accid = '%s' 
+                        '''% (alleleTypeKey, a),  'auto')
+                if len(results) == 0:
+                    errorFile.write('Invalid Allele (row %d): %s\n' % (lineNum, a))
+                    hasFatalError += 1
                     continue
-
-                if alleleKey == None:
-                    continue
+                else:
+                    alleleKey = results[0]['_Object_key']
 
                 # if sanity check only, skip/continue
                 if isSanityCheck == 1:
@@ -489,10 +491,16 @@ def processFile():
                 # this is a null qualifier key
                 annotQualifierKey = 1614158
 
-                annotTermKey = loadlib.verifyTerm('', 27, a, lineNum, errorFile)
-                if annotTermKey == 0:
+                results = db.sql('''
+                        select _Object_key from ACC_Accession where _mgitype_key = 27 and accid = '%s' 
+                        '''% (alleleTypeKey, a),  'auto')
+                if len(results) == 0:
+                    errorFile.write('Invalid Term (row %d): %s\n' % (lineNum, a))
+                    hasFatalError += 1
                     continue
-    
+                else:
+                    annotTermKey = results[0]['_Object_key']
+
                 annotFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
                   % (annotKey, annotTypeKey, strainKey, annotTermKey, annotQualifierKey, cdate, cdate))
                 annotKey = annotKey + 1

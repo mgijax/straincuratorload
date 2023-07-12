@@ -382,7 +382,13 @@ def processFile():
             isPrivate = tokens[12]
             impcColonyNote = tokens[13]
         except:
-            exit(1, 'Invalid Line (row %d): %s\n' % (lineNum, line))
+            errorFile.write('Invalid Line (row %d): %s\n' % (lineNum, line))
+            hasFatalError += 1
+            continue
+
+        # skip header row
+        if id == 'Strain ID':
+                continue
 
         strainExistKey = verifyStrain(name, lineNum)
         strainTypeKey = verifyStrainType(strainType, lineNum)

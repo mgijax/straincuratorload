@@ -21,7 +21,7 @@
 #
 # Outputs:
 #
-#       4 BCP files:
+#       5 BCP files:
 #
 #       PRB_Strain.bcp                  master Strain records
 #       PRB_Strain_Marker.bcp           master Strain records
@@ -427,6 +427,39 @@ def processFile():
 
                 strainmarkerKey = strainmarkerKey + 1
 
+        #
+        # Annotations
+        # _AnnotType_key = 1009
+        # _Qualifier_ke = 1614158
+        #
+        if len(annotations) > 0:
+            annotations = annotations.split('|')
+            for a in annotations:
+
+                # strain annotation type
+                annotTypeKey = 1009
+
+                # this is a null qualifier key
+                annotQualifierKey = 1614158
+
+                results = db.sql('''
+                        select _Term_key from VOC_Term where _vocab_key = 27 and term = '%s' 
+                        '''% (a),  'auto')
+                if len(results) == 0:
+                    errorFile.write('Invalid Strain Association Term (row %d): %s\n' % (lineNum, a))
+                    hasFatalError += 1
+                    continue
+                else:
+                    annotTermKey = results[0]['_Term_key']
+
+                # if sanity check only, skip/continue
+                if isSanityCheck == 1:
+                        continue
+
+                annotFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
+                  % (annotKey, annotTypeKey, strainKey, annotTermKey, annotQualifierKey, cdate, cdate))
+                annotKey = annotKey + 1
+
         # if sanity check only, skip/continue
         if isSanityCheck == 1:
                 continue
@@ -475,35 +508,6 @@ def processFile():
                 % (noteKey, strainKey, mgiNoteObjectKey, mgiIMPCColonyTypeKey, impcColonyNote, \
                    createdByKey, createdByKey, cdate, cdate))
             noteKey = noteKey + 1
-
-        #
-        # Annotations
-        # _AnnotType_key = 1009
-        # _Qualifier_ke = 1614158
-        #
-        if len(annotations) > 0:
-            annotations = annotations.split('|')
-            for a in annotations:
-
-                # strain annotation type
-                annotTypeKey = 1009
-
-                # this is a null qualifier key
-                annotQualifierKey = 1614158
-
-                results = db.sql('''
-                        select _Object_key from ACC_Accession where _mgitype_key = 27 and accid = '%s' 
-                        '''% (alleleTypeKey, a),  'auto')
-                if len(results) == 0:
-                    errorFile.write('Invalid Term (row %d): %s\n' % (lineNum, a))
-                    hasFatalError += 1
-                    continue
-                else:
-                    annotTermKey = results[0]['_Object_key']
-
-                annotFile.write('%s|%s|%s|%s|%s|%s|%s\n' \
-                  % (annotKey, annotTypeKey, strainKey, annotTermKey, annotQualifierKey, cdate, cdate))
-                annotKey = annotKey + 1
 
         mgiKey = mgiKey + 1
         strainKey = strainKey + 1

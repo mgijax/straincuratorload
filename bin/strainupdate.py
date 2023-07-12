@@ -17,8 +17,8 @@
 #
 #       2 BCP files:
 #
-#       PRB_Strain_Marker.bcp           master Strain records
-#       MGI_Synonym.bcp
+#       PRB_Strain_Marker_update.bcp
+#       MGI_Synonym_update.bcp
 #
 #       Diagnostics file of all input parameters and SQL commands
 #       Error file
@@ -54,8 +54,8 @@ errorFile = ''
 markerFile = ''
 synonymFile = ''
 
-markerTable = 'PRB_Strain_Marker'
-synonymTable = 'MGI_Synonym'
+markerTable = 'PRB_Strain_Marker_update'
+synonymTable = 'MGI_Synonym_update'
 markerFileName = markerTable + '.bcp'
 synonymFileName = synonymTable + '.bcp'
 

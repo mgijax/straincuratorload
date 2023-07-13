@@ -152,7 +152,7 @@ def exit(
 def init():
     global inputFileName, mode, isSanityCheck
     global diagFileName, errorFileName, diagFile, errorFile, inputFile
-    global markerFile, synonymFile
+    global strainFile, markerFile, accFile, annotFile, noteFile
  
     try:
         inputFileName = sys.argv[1]
@@ -188,27 +188,27 @@ def init():
     
     if isSanityCheck == 0:
         try:
-                strainFile = open(strainFileName, 'w')
+                strainFile = open(outputFile + '/' + strainFileName, 'w')
         except:
                 exit(1, 'Could not open file %s\n' % strainFileName)
 
         try:
-                markerFile = open(markerFileName, 'w')
+                markerFile = open(outputFile + '/' + markerFileName, 'w')
         except:
                 exit(1, 'Could not open file %s\n' % markerFileName)
 
         try:
-                accFile = open(accFileName, 'w')
+                accFile = open(outputFile + '/' + accFileName, 'w')
         except:
                 exit(1, 'Could not open file %s\n' % accFileName)
 
         try:
-                noteFile = open(noteFileName, 'w')
+                noteFile = open(outputFile + '/' + noteFileName, 'w')
         except:
                 exit(1, 'Could not open file %s\n' % noteFileName)
 
         try:
-                annotFile = open(annotFileName, 'w')
+                annotFile = open(outputFile + '/' + annotFileName, 'w')
         except:
                 exit(1, 'Could not open file %s\n' % annotFileName)
 

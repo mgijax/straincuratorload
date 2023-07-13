@@ -4,20 +4,20 @@
 # Inputs:
 #
 #	A tab-delimited file in the format:
-#		field 1:  Strain id
-#		field 2:  Strain Name
-#		field 3:  MGI Allele ID (pipe-delimited)
-#		field 4:  Strain Type (ex. 'coisogenic', 'congenic', 'conplastic')
-#		field 5:  Strain Species (ex. 'laboratory mouse')
-#		field 6:  Standard (1/0)
-#		field 7:  Strain of Origin Note
-#		field 8:  External Logical DB key
-#		field 9:  External MGI Type key
-#		field 10: Strain Attributes (xxxxx|xxxxx) (ex. 'chromosome aberration', 'closed colony')
-#		field 11: Created By
-#		field 12: Mutant ES Cell line of Origin note
-#		field 13: Private (1/0)
-#	        field 14: IMPC Colony Note
+#	field 1:  Strain id
+#	field 2:  Strain Name
+#	field 3:  MGI Allele ID (pipe-delimited)
+#	field 4:  Strain Type (ex. 'coisogenic', 'congenic', 'conplastic')
+#	field 5:  Strain Species (ex. 'laboratory mouse')
+#	field 6:  Standard (1/0)
+#	field 7:  Strain of Origin Note
+#	field 8:  External Logical DB key
+#	field 9:  External MGI Type key
+#	field 10: Strain Attributes (xxxxx|xxxxx) (ex. 'chromosome aberration', 'closed colony')
+#	field 11: Created By
+#	field 12: Mutant ES Cell line of Origin note
+#	field 13: Private (1/0)
+#	field 14: IMPC Colony Note
 #
 # Outputs:
 #

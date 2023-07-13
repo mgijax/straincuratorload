@@ -4,7 +4,6 @@
 # Inputs:
 #
 #	A tab-delimited file in the format:
-#
 #       field 1: MGI:Strain ID
 #       field 2: MGI Allele ID : not required : pipe delimited 
 #		if Private = No, then allele status must be Approved or Autoloaded

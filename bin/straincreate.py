@@ -313,6 +313,32 @@ def verifyStrain(
 
     return strainExistKey
 
+# Purpose:  verify External Logical DB key & MGI Type key
+# Returns:  nothing
+# Assumes:  nothing
+# Effects:  verifies that the External Logical DB key & MGI Type key exist
+#	writes to the error file if either key is invalid
+# Throws:  nothing
+def verifyExternalInfo(
+    externalLDB, 	# External Logical DB key (string)
+    externalTypeKey, 	# External MGI Type key (string)
+    lineNum	# line number (integer)
+    ):
+
+    global hasFatalError, hasWarningError
+
+    results = db.sql('select _logicaldb_key from ACC_LogicalDB where _logicaldb_key = %s' % (externalLDB), 'auto')
+    if len(results) == 0:
+        errorFile.write('Invalid External Logical DB key (row %d): %s\n' % (lineNum, externalLDB))
+        hasFatalError += 1
+
+    results = db.sql('select _mgitype_key from ACC_MGIType where _mgitype_key = %s' % (externalTypeKey), 'auto')
+    if len(results) == 0:
+        errorFile.write('Invalid External MGI Type key (row %d): %s\n' % (lineNum, externalTypeKey))
+        hasFatalError += 1
+
+    return
+
 # Purpose:  sets global primary key variables
 # Returns:  nothing
 # Assumes:  nothing
@@ -391,9 +417,7 @@ def processFile():
         strainTypeKey = verifyStrainType(strainType, lineNum)
         speciesKey = verifySpecies(species, lineNum)
         createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
-
-        if strainExistKey > 0 or strainTypeKey == 0 or speciesKey == 0 or createdByKey == 0:
-            hasFatalError += 1
+        verifyExternalInfo(externalLDB, externalTypeKey, lineNum)
 
 	# if Allele found, resolve to Marker
         if len(alleleIDs) > 0:

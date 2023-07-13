@@ -546,22 +546,21 @@ def bcpFiles():
     noteFile.flush()
 
     bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
-    currentDir = os.getcwd()
 
     bcp1 = '%s %s %s %s %s %s "|" "\\n" mgd' % \
-        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'PRB_Strain', currentDir, strainFileName)
+        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'PRB_Strain', outputFile, strainFileName)
 
     bcp2 = '%s %s %s %s %s %s "|" "\\n" mgd' % \
-        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'PRB_Strain_Marker', currentDir, markerFileName)
+        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'PRB_Strain_Marker', outputFile, markerFileName)
 
     bcp3 = '%s %s %s %s %s %s "|" "\\n" mgd' % \
-        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'ACC_Accession', currentDir, accFileName)
+        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'ACC_Accession', outputFile, accFileName)
 
     bcp4 = '%s %s %s %s %s %s "|" "\\n" mgd' % \
-        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'VOC_Annot', currentDir, annotFileName)
+        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'VOC_Annot', outputFile, annotFileName)
 
     bcp5 = '%s %s %s %s %s %s "|" "\\n" mgd' % \
-        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'MGI_Note', currentDir, noteFileName)
+        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), 'MGI_Note', outputFile, noteFileName)
 
     diagFile.write('%s\n' % bcp1)
     diagFile.write('%s\n' % bcp2)

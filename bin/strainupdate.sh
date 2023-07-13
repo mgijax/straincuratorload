@@ -64,6 +64,19 @@ fi
 preload ${OUTPUTDIR}
 cleanDir ${OUTPUTDIR}
 
+#
+# if INPUT_FILE_DEFAULT does not exist, then skip load
+#
+if [ -f ${INPUT_FILE_DEFAULT} ]
+then
+        echo "Input file does not exist - skipping load" | tee -a ${LOG_PROC}
+        # set STAT for shutdown
+        STAT=0
+        echo 'shutting down'
+        shutDown
+        exit 0
+fi
+
 # NOTE: keep this commented out until production release
 #
 # There should be a "lastrun" file in the input directory that was updated

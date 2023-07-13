@@ -69,7 +69,7 @@ cleanDir ${OUTPUTDIR}
 #
 if [ ! -f ${INPUT_FILE_DEFAULT} ]
 then
-        echo "Input file does not exist - skipping load" | tee -a ${LOG_PROC}
+        echo "Input file ${INPUT_FILE_DEFAULT} does not exist - skipping load" | tee -a ${LOG_PROC}
         # set STAT for shutdown
         STAT=0
         echo 'shutting down'

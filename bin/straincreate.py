@@ -84,9 +84,6 @@ accFileName = accTable + '.bcp'
 annotFileName = annotTable + '.bcp'
 noteFileName = noteTable + '.bcp'
 
-diagFileName = ''	# diagnostic file name
-errorFileName = ''	# error file name
-
 strainKey = 0           # PRB_Strain._Strain_key
 strainmarkerKey = 0	# PRB_Strain_Marker._StrainMarker_key
 accKey = 0              # ACC_Accession._Accession_key

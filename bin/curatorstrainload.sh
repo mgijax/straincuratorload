@@ -13,7 +13,7 @@
 #
 
 BINDIR=`dirname $0`
-COMMON_CONFIG=`cd ${BINDIR}/..; pwd`/curatorstrainload.config
+COMMON_CONFIG=`cd ${BINDIR}/..; pwd`/curatorstrain.config
 USAGE="Usage: curatorstrainload.sh"
 
 #

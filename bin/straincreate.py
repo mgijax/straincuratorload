@@ -187,7 +187,7 @@ def init():
     try:
         inputFile = open(inputFileName, 'r', encoding="latin-1")
     except:
-        exit(1, 'Could not open file inputFIleName: %s\n' % inputFileName)
+        exit(1, 'Could not open file inputFileName: %s\n' % inputFileName)
     
     if isSanityCheck == 0:
         try:

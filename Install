@@ -29,8 +29,22 @@ fi
 #
 cd `dirname $0`
 
+cp -r curatorstrain.config.default curatorstrain.config
 cp -r straincreate.config.default straincreate.config
 cp -r strainupdate.config.default strainupdate.config
+
+# establish the config files
+MAIN_CONFIG=curatorstrain.config
+
+# Make sure config file exists and source it
+if [ -r ${MAIN_CONFIG} ]
+then
+    echo "Source ${MAIN_CONFIG}"
+    . ${MAIN_CONFIG}
+else
+    echo "Cannot source configuration file: ${MAIN_CONFIG}"
+    installFailed
+fi
 
 # establish the config files
 MAIN_CONFIG=straincreate.config

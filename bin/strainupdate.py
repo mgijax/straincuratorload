@@ -56,10 +56,10 @@ errorFile = ''
 markerFile = ''
 synonymFile = ''
 
-markerTable = 'PRB_Strain_Marker_update'
-synonymTable = 'MGI_Synonym_update'
-markerFileName = markerTable + '.bcp'
-synonymFileName = synonymTable + '.bcp'
+markerTable = 'PRB_Strain_Marker'
+synonymTable = 'MGI_Synonym'
+markerFileName = markerTable + '_update.bcp'
+synonymFileName = synonymTable + '_update.bcp'
 
 updateSQL = ''
 

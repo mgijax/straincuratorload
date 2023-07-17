@@ -62,7 +62,6 @@ fi
 # sets "JOBKEY"
 #
 preload ${OUTPUTDIR}
-cleanDir ${OUTPUTDIR}
 
 #
 # if INPUT_FILE_DEFAULT does not exist, then skip load

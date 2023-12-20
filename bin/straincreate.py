@@ -49,6 +49,7 @@ import os
 import db
 import mgi_utils
 import loadlib
+import accessionlib
 
 #db.setTrace()
 
@@ -390,7 +391,9 @@ def processFile():
             id = tokens[0]
             externalPrefix = id
             externalNumeric = ''
-            #(externalPrefix, externalNumeric) = id.split(':')
+            (externalPrefix, externalNumeric) = accessionlib.split_accnum(id)
+            if externalNumeric == None:
+                externalNumeric = ''
             name = tokens[1]
             alleleIDs = tokens[2]
             strainType = tokens[3]

@@ -387,6 +387,11 @@ def processFile():
         # Split the line into tokens
         tokens = line[:-1].split('\t')
 
+        if line.find("\"") >= 1:
+                errorFile.write('Quotes in row (row %d): %s\n' % (lineNum, line))
+                hasFatalError += 1
+                continue
+
         try:
             id = tokens[0]
             externalPrefix = id

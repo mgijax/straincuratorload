@@ -427,6 +427,12 @@ def processFile():
         createdByKey = loadlib.verifyUser(createdBy, lineNum, errorFile)
         verifyExternalInfo(externalLDB, externalTypeKey, lineNum)
 
+        if len(sooNote) > 0:
+                if sooNote.find("|") >= 1:
+                        errorFile.write('Invalid Strain of Origin : pipes found ("|") (row %d): %s\n' % (lineNum, line))
+                        hasFatalError += 1
+                        continue
+
 	# if Allele found, resolve to Marker
         if len(alleleIDs) > 0:
 

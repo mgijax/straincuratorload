@@ -433,6 +433,11 @@ def processFile():
                         hasFatalError += 1
                         continue
 
+        if isPrivate not in ('0', '1'):
+                        errorFile.write('Private must be 0 or 1 (row %d): %s\n' % (lineNum, line))
+                        hasFatalError += 1
+                        continue
+                
 	# if Allele found, resolve to Marker
         if len(alleleIDs) > 0:
 
@@ -639,6 +644,6 @@ def bcpFiles():
 init()
 setPrimaryKeys()
 processFile()
-bcpFiles()
+#bcpFiles()
 exit(0)
 

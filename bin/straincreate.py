@@ -644,6 +644,6 @@ def bcpFiles():
 init()
 setPrimaryKeys()
 processFile()
-#bcpFiles()
+bcpFiles()
 exit(0)
 

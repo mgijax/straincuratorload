@@ -392,6 +392,10 @@ def processFile():
 	'''update PRB_Strain set strain = \'%s\', standard = %s, private = %s, _modifiedby_key = %s, modification_date = now() where _Strain_key = %s;\n''' \
 	% (name, isStandard, isPrivate, modifiedByKey, strainKey)
 
+        updateSQL = updateSQL + \
+	'''update ACC_Accession set private = %s, _modifiedby_key = %s, modification_date = now() where _LogicalDB_key != 1 and _MGIType_key = 10 and _Object_key = %s;\n''' \
+	% (isPrivate, modifiedByKey, strainKey)
+
         if name != oldName:
                 synonymFile.write('%d|%d|%d|%d||%s|%s|%s|%s|%s\n' \
                         % (synonymKey, strainKey, mgiTypeKey, synonymTypeKey, oldName, modifiedByKey, modifiedByKey, cdate, cdate))

@@ -393,7 +393,7 @@ def processFile():
 	% (name, isStandard, isPrivate, modifiedByKey, strainKey)
 
         updateSQL = updateSQL + \
-	'''update ACC_Accession set private = %s, _modifiedby_key = %s, modification_date = now() where _LogicalDB_key != 1 and _MGIType_key = 10 and _Object_key = %s;\n''' \
+	'''update ACC_Accession set private = %s, _modifiedby_key = %s, modification_date = now() where _MGIType_key = 10 and _Object_key = %s;\n''' \
 	% (isPrivate, modifiedByKey, strainKey)
 
         if name != oldName:
